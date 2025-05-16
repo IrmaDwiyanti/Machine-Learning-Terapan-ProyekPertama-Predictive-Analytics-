@@ -207,3 +207,8 @@ Proyek ini menunjukkan bahwa machine learning mampu membantu dunia pendidikan da
 
 ---
 
+## Referensi
+
+[1] G. D. Kuh, J. Kinzie, J. H. Schuh, E. J. Whitt, Student Success in College: Creating Conditions That Matter, 1st ed., San Francisco, CA, USA: Jossey-Bass, 2005.
+
+[2] A. Al-Barrak and M. Al-Razgan, "Predicting Students Final GPA Using Decision Trees: A Case Study," International Journal of Information and Education Technology, vol. 6, no. 7, pp. 528-533, 2016.
