@@ -132,7 +132,6 @@ Insight:
 Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, membaca, dan menulis (korelasi >0.8), dengan korelasi tertinggi terjadi antara reading score dan writing score (0.95), sementara average_score memiliki korelasi hampir sempurna dengan ketiga nilai ujian (0.92-0.97) karena merupakan rata-ratanya. Variabel prestasi yang dikodekan sebagai binary (0/1) menunjukkan korelasi negatif dengan nilai-nilai ujian, namun sebenarnya memiliki hubungan positif yang kuat (ditunjukkan oleh nilai absolut >0.7), mengindikasikan bahwa siswa dengan nilai tinggi cenderung termasuk dalam kategori berprestasi.
 
 
-
 ---
 
 ## 🧹 Data Preparation
@@ -155,49 +154,122 @@ Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, 
 ## 🤖 Modeling
 
 ### Problem 1: Klasifikasi Prestasi Siswa
-- **Model**: `RandomForestClassifier`
-- **Input**: Semua fitur kecuali skor & label target.
-- **Output**: Label `prestasi` (1 = berprestasi, 0 = tidak)
-- **Hasil**: Akurasi: **~0.90**, Confusion Matrix digunakan sebagai visualisasi evaluasi.
-- **Kelebihan**: Robust terhadap noise, tidak memerlukan scaling.
-- **Kekurangan**: Kurang interpretatif, model kompleks.
+
+-   **Model**: `RandomForestClassifier`
+-   **Input**: Fitur demografis siswa, tingkat pendidikan orang tua, jenis makan siang, dan apakah mengikuti kursus persiapan tes.
+-   **Target**: Kategori prestasi siswa (berprestasi/tidak berprestasi) yang ditentukan berdasarkan rata-rata skor.
+-   **Penjelasan Algoritma**:
+    -   Random Forest adalah algoritma ensemble yang terdiri dari banyak Decision Tree. Setiap tree memberikan prediksi, dan Random Forest menggabungkan prediksi-prediksi ini (melalui voting untuk klasifikasi) untuk membuat prediksi akhir.
+    -   Prinsip dasar dari bagging (Bootstrap Aggregating) digunakan, di mana setiap tree dilatih pada subset data yang di-bootstrap (diambil sampel dengan pengembalian). Ini meningkatkan variasi antar tree dan mengurangi overfitting.
+    -   Struktur pohon keputusan melibatkan serangkaian percabangan berdasarkan fitur-fitur input, yang akhirnya mengarah pada prediksi kelas.
+-   **Parameter Utama dan Alasan Pemilihan**:
+    -   `n_estimators` (100): Jumlah tree dalam forest. 100 tree dipilih sebagai trade-off antara performa dan waktu komputasi. Semakin banyak tree, semakin stabil prediksi, tetapi dengan biaya komputasi yang lebih tinggi.
+    -   `max_depth` (10): Kedalaman maksimum setiap tree. Membatasi kedalaman tree membantu mencegah overfitting, di mana model menjadi terlalu kompleks dan menghafal data training. Nilai 10 dipilih setelah eksperimentasi untuk memberikan performa yang baik tanpa overfitting.
+    -   `random_state` (42): Seed untuk random generator. Digunakan untuk memastikan hasil yang reproducible.
+-   **Hasil**:
+    -   Akurasi: ~0.68
+    -   Detail performa dapat dilihat pada *Confusion Matrix* dan *Classification Report* di notebook.
+-   **Kelebihan**:
+    -   Robust terhadap overfitting karena menggunakan ensemble.
+    -   Dapat menangani fitur dengan berbagai tipe data.
+-   **Kekurangan**:
+    -   Kurang interpretatif dibandingkan dengan Decision Tree tunggal.
+    -   Membutuhkan waktu komputasi yang lebih lama dibandingkan model linier.
 
 ### Problem 2: Prediksi Skor Matematika
-- **Model**: `RandomForestRegressor`
-- **Input**: Semua fitur kecuali `math score` dan turunan label lain.
-- **Target**: `math score`
-- **Hasil**:
-  - RMSE: ~**5.2**
-  - R²: ~**0.88**
+
+-   **Model**: `RandomForestRegressor`
+-   **Input**: Semua fitur kecuali `math score` dan turunan label lain.
+-   **Target**: `math score`
+-   **Penjelasan Algoritma**:
+    -   Random Forest untuk regresi bekerja dengan cara yang sama seperti klasifikasi, tetapi prediksi yang dihasilkan adalah rata-rata dari prediksi setiap tree.
+-   **Parameter Utama dan Alasan Pemilihan**:
+    -   Parameter yang digunakan sama dengan model klasifikasi (`n_estimators`, `max_depth`, `random_state`) dengan alasan yang sama.
+-   **Hasil**:
+    -   RMSE: ~20.88
+    -   R²: ~0.27
 
 ### Problem 3: Estimasi Total Skor dari Fitur Demografis
-- **Model**: `LinearRegression`
-- **Input**: Fitur demografis + `test preparation course`
-- **Target**: `total_score`
-- **Hasil**:
-  - RMSE: ~**13.9**
-  - R²: ~**0.65**
+
+-   **Model**: `LinearRegression`
+-   **Input**: Fitur demografis + `test preparation course`
+-   **Target**: `total_score`
+-   **Penjelasan Algoritma**:
+    -   Linear Regression mencari hubungan linier antara fitur-fitur input dan target. Model ini mencoba menemukan garis (atau hyperplane dalam dimensi yang lebih tinggi) yang paling cocok dengan data, meminimalkan jumlah kuadrat error antara prediksi dan nilai sebenarnya.
+    -   Asumsi utama Linear Regression adalah hubungan linier antara fitur dan target, independensi error, homoskedastisitas (variansi error konstan), dan normalitas error.
+-   **Parameter Utama dan Alasan Pemilihan**:
+    -   Dalam implementasi sederhana ini, kita tidak menggunakan regularisasi. Regularisasi (seperti Ridge atau Lasso) dapat ditambahkan untuk mencegah overfitting, tetapi tidak diperlukan di sini karena jumlah fitur relatif kecil.
+-   **Hasil**:
+    -   RMSE: ~41.07
+    -   R²: ~0.13
+-   **Kelebihan**:
+    -   Interpretatif (koefisien memberikan informasi tentang hubungan antara fitur dan target).
+    -   Komputasi efisien.
+-   **Kekurangan**:
+    -   Hanya dapat menangkap hubungan linier.
+    -   Sensitif terhadap outlier.
 
 ---
+
 
 ## 📏 Evaluation
 
 ### Metrik Evaluasi:
 
-1. **Klasifikasi:**
-   - **Accuracy** = (TP + TN) / Total
-   - Cocok digunakan karena dataset seimbang antara prestasi dan tidak.
-   - Juga digunakan **Confusion Matrix** untuk detail performa.
+1.  **Klasifikasi:**
+    -   **Accuracy**: Mengukur proporsi prediksi yang benar dari total prediksi.
+        -   Rumus:  
+            ```latex
+            \text{Accuracy} = \frac{\text{Jumlah prediksi benar}}{\text{Total jumlah prediksi}}
+            ```
+        -   Contoh: Jika model memprediksi 80 dari 100 sampel dengan benar, akurasinya adalah 0.8 atau 80%.
+    -   **Confusion Matrix**: Tabel yang merangkum hasil prediksi klasifikasi.
+        -   Menunjukkan jumlah True Positive (TP), True Negative (TN), False Positive (FP), dan False Negative (FN).
+        -   Penting untuk memahami jenis kesalahan yang dibuat oleh model.
+    -   **Classification Report**: Menyediakan metrik seperti Precision, Recall, dan F1-score selain Accuracy.
+        -   **Precision**: Proporsi prediksi positif yang benar.
+            -   Rumus:
+                ```latex
+                \text{Precision} = \frac{TP}{TP + FP}
+                ```
+        -   **Recall**: Proporsi aktual positif yang teridentifikasi dengan benar.
+            -   Rumus:
+                ```latex
+                \text{Recall} = \frac{TP}{TP + FN}
+                ```
+        -   **F1-score**: Rata-rata harmonik dari Precision dan Recall.
+            -   Rumus:
+                ```latex
+                \text{F1-score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+                ```
+    -   Alasan Pemilihan:
+        -   Accuracy memberikan gambaran keseluruhan performa model klasifikasi.
+        -   Confusion Matrix memberikan detail lebih lanjut tentang performa per kelas.
+        -   Classification Report memberikan metrik tambahan yang berguna untuk memahami trade-off antara Precision dan Recall.
 
-2. **Regresi:**
-   - **RMSE** = √(MSE) → Mengukur deviasi rata-rata prediksi dari nilai sebenarnya.
-   - **R² Score** = Prosentase variansi target yang dapat dijelaskan oleh model.
+2.  **Regresi:**
+    -   **Root Mean Squared Error (RMSE)**: Mengukur rata-rata besarnya error antara prediksi dan nilai aktual.
+        -   Rumus:
+            ```latex
+            \text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
+            ```
+            -   di mana \( y_i \) adalah nilai aktual, \( \hat{y}_i \) adalah nilai prediksi, dan \( n \) adalah jumlah data.
+        -   Interpretasi: RMSE yang lebih rendah menunjukkan model yang lebih baik.
+    -   **R-squared (R²)**: Mengukur proporsi variansi dalam variabel dependen yang dapat diprediksi dari variabel independen.
+        -   Rumus:
+            ```latex
+            R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
+            ```
+            -   di mana \( y_i \) adalah nilai aktual, \( \hat{y}_i \) adalah nilai prediksi, \( \bar{y} \) adalah rata-rata nilai aktual, dan \( n \) adalah jumlah data.
+        -   Interpretasi: R² berkisar antara 0 dan 1. R² yang lebih tinggi menunjukkan model yang lebih baik dalam menjelaskan variansi data.
 
-### Hasil evaluasi menunjukkan:
-- Model klasifikasi sangat baik dengan akurasi tinggi.
-- Model regresi matematika menunjukkan performa prediksi yang sangat baik.
-- Model estimasi total skor cukup baik meskipun hanya menggunakan data demografis.
+### Hasil Evaluasi:
 
+-   **Klasifikasi Prestasi Siswa**: Model Random Forest mencapai akurasi sekitar 68%. Confusion Matrix dan Classification Report memberikan detail performa per kelas.
+-   **Prediksi Skor Matematika**: Model Random Forest menghasilkan RMSE sekitar 20.88 dan R² sekitar 0.27. Ini menunjukkan bahwa model memiliki error rata-rata sekitar 20.88 poin dalam memprediksi skor matematika dan hanya menjelaskan sebagian kecil variansi dalam skor matematika.
+-   **Estimasi Total Skor**: Model Linear Regression menghasilkan RMSE sekitar 41.07 dan R² sekitar 0.13. Ini menunjukkan bahwa model memiliki error rata-rata yang cukup tinggi dalam memprediksi total skor dan hanya menjelaskan sebagian kecil variansi dalam total skor.
+
+---
 ---
 
 
