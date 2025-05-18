@@ -156,6 +156,7 @@ Heatmap di atas menggambarkan korelasi antara variabel-variabel numerik dalam da
 ### Problem 1: Klasifikasi Prestasi Siswa
 
 -   **Model**: `RandomForestClassifier`
+-   **Input**: Fitur demografis siswa, tingkat pendidikan orang tua, jenis makan siang, dan apakah mengikuti kursus persiapan tes.
 -   **Target**: Kategori prestasi siswa (berprestasi/tidak berprestasi) yang ditentukan berdasarkan rata-rata skor.
 -   **Penjelasan Algoritma**:
     -   Random Forest adalah algoritma ensemble yang terdiri dari banyak Decision Tree. Setiap tree memberikan prediksi, dan Random Forest menggabungkan prediksi-prediksi ini (melalui voting untuk klasifikasi) untuk membuat prediksi akhir.
