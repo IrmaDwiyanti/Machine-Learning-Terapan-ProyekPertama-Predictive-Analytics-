@@ -77,13 +77,14 @@ Masalah ini penting diselesaikan karena dapat membantu sekolah dalam melakukan *
 
 ### Distribusi Prestasi Siswa
 
-![image](https://github.com/user-attachments/assets/fa75fc34-9458-4642-9c2d-05426a350b20)
+![image](https://github.com/user-attachments/assets/3e27e13d-2eac-4418-a19a-05974d602c42)
+
 
 Insight:
 
-- Lebih banyak siswa yang berprestasi dibandingkan yang tidak.
+- Lebih banyak siswa yang tidak berprestasi dibandingkan yang berprestasi.
 
-- Ini menunjukkan bahwa mayoritas siswa dalam data ini memiliki capaian prestasi yang diakui.
+- Ini menunjukkan bahwa mayoritas siswa dalam data ini memiliki capaian prestasi yang kurang.
 
 ### Distribusi Math Score
 
@@ -127,10 +128,9 @@ Insight:
 
 ## heatmap korelasi fitur numerik
 
-![image](https://github.com/user-attachments/assets/cd1797fc-0975-4f1c-b2f4-cb2f828d28fb)
+![image](https://github.com/user-attachments/assets/924e76b8-83e9-4107-ba09-f5a7a7f5e099)
 
-Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, membaca, dan menulis (korelasi >0.8), dengan korelasi tertinggi terjadi antara reading score dan writing score (0.95), sementara average_score memiliki korelasi hampir sempurna dengan ketiga nilai ujian (0.92-0.97) karena merupakan rata-ratanya. Variabel prestasi yang dikodekan sebagai binary (0/1) menunjukkan korelasi negatif dengan nilai-nilai ujian, namun sebenarnya memiliki hubungan positif yang kuat (ditunjukkan oleh nilai absolut >0.7), mengindikasikan bahwa siswa dengan nilai tinggi cenderung termasuk dalam kategori berprestasi.
-
+Heatmap di atas menggambarkan korelasi antara variabel-variabel numerik dalam dataset. Warna yang lebih terang (mendekati kuning) menunjukkan korelasi positif yang kuat, sedangkan warna yang lebih gelap (mendekati ungu) menunjukkan korelasi negatif yang kuat. Dari visualisasi ini, terlihat bahwa math score, reading score, dan writing score memiliki korelasi positif yang sangat tinggi satu sama lain, mengindikasikan bahwa siswa yang mendapatkan skor tinggi di salah satu mata pelajaran cenderung mendapatkan skor tinggi di mata pelajaran lainnya. Variabel lain seperti gender, race/ethnicity, parental level of education, lunch, dan test preparation course, setelah di-encode, menunjukkan korelasi yang relatif lemah dengan skor-skor tersebut.
 
 ---
 
@@ -156,7 +156,6 @@ Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, 
 ### Problem 1: Klasifikasi Prestasi Siswa
 
 -   **Model**: `RandomForestClassifier`
--   **Input**: Fitur demografis siswa, tingkat pendidikan orang tua, jenis makan siang, dan apakah mengikuti kursus persiapan tes.
 -   **Target**: Kategori prestasi siswa (berprestasi/tidak berprestasi) yang ditentukan berdasarkan rata-rata skor.
 -   **Penjelasan Algoritma**:
     -   Random Forest adalah algoritma ensemble yang terdiri dari banyak Decision Tree. Setiap tree memberikan prediksi, dan Random Forest menggabungkan prediksi-prediksi ini (melalui voting untuk klasifikasi) untuk membuat prediksi akhir.
@@ -167,8 +166,23 @@ Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, 
     -   `max_depth` (10): Kedalaman maksimum setiap tree. Membatasi kedalaman tree membantu mencegah overfitting, di mana model menjadi terlalu kompleks dan menghafal data training. Nilai 10 dipilih setelah eksperimentasi untuk memberikan performa yang baik tanpa overfitting.
     -   `random_state` (42): Seed untuk random generator. Digunakan untuk memastikan hasil yang reproducible.
 -   **Hasil**:
-    -   Akurasi: ~0.68
-    -   Detail performa dapat dilihat pada *Confusion Matrix* dan *Classification Report* di notebook.
+    -   Akurasi klasifikasi: 59.00%
+    -   Detail performa dapat dilihat pada *Confusion Matrix* berikut:
+      
+        ![image](https://github.com/user-attachments/assets/5cb06bb4-87d4-4ebc-a2af-7adbf6d19540)
+
+        ![image](https://github.com/user-attachments/assets/2b7d829a-a3e4-40b2-8298-d970deae82d7)
+
+        True Negative (TN): 69 (aktual 0, diprediksi 0)
+
+        False Positive (FP): 41 (aktual 0, diprediksi 1)
+
+        False Negative (FN): 41 (aktual 1, diprediksi 0)
+
+        True Positive (TP): 49 (aktual 1, diprediksi 1)
+
+        Model ini memiliki akurasi sedang, namun terdapat banyak kesalahan klasifikasi (FP & FN = 41), artinya model sering salah dalam membedakan antara dua kelas. Perlu          dievaluasi dengan metrik seperti precision, recall, atau F1-score jika ingin tahu lebih detail.
+
 -   **Kelebihan**:
     -   Robust terhadap overfitting karena menggunakan ensemble.
     -   Dapat menangani fitur dengan berbagai tipe data.
@@ -179,15 +193,14 @@ Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, 
 ### Problem 2: Prediksi Skor Matematika
 
 -   **Model**: `RandomForestRegressor`
--   **Input**: Semua fitur kecuali `math score` dan turunan label lain.
 -   **Target**: `math score`
 -   **Penjelasan Algoritma**:
     -   Random Forest untuk regresi bekerja dengan cara yang sama seperti klasifikasi, tetapi prediksi yang dihasilkan adalah rata-rata dari prediksi setiap tree.
 -   **Parameter Utama dan Alasan Pemilihan**:
     -   Parameter yang digunakan sama dengan model klasifikasi (`n_estimators`, `max_depth`, `random_state`) dengan alasan yang sama.
 -   **Hasil**:
-    -   RMSE: ~20.88
-    -   R²: ~0.27
+    - RMSE (Math Score): 4.47
+    - R² Score (Math Score): 0.92
 
 ### Problem 3: Estimasi Total Skor dari Fitur Demografis
 
@@ -200,8 +213,8 @@ Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, 
 -   **Parameter Utama dan Alasan Pemilihan**:
     -   Dalam implementasi sederhana ini, kita tidak menggunakan regularisasi. Regularisasi (seperti Ridge atau Lasso) dapat ditambahkan untuk mencegah overfitting, tetapi tidak diperlukan di sini karena jumlah fitur relatif kecil.
 -   **Hasil**:
-    -   RMSE: ~41.07
-    -   R²: ~0.13
+    -   RMSE: 41.07
+    -   R²: 0.13
 -   **Kelebihan**:
     -   Interpretatif (koefisien memberikan informasi tentang hubungan antara fitur dan target).
     -   Komputasi efisien.
@@ -214,62 +227,139 @@ Heatmap korelasi menunjukkan hubungan yang sangat kuat antara nilai matematika, 
 
 ## 📏 Evaluation
 
-### Metrik Evaluasi:
+## 📊 Perhitungan Akurasi (Accuracy) - Klasifikasi Prestasi
 
-1.  **Klasifikasi:**
-    -   **Accuracy**: Mengukur proporsi prediksi yang benar dari total prediksi.
-        -   Rumus:  
-            ```latex
-            \text{Accuracy} = \frac{\text{Jumlah prediksi benar}}{\text{Total jumlah prediksi}}
-            ```
-        -   Contoh: Jika model memprediksi 80 dari 100 sampel dengan benar, akurasinya adalah 0.8 atau 80%.
-    -   **Confusion Matrix**: Tabel yang merangkum hasil prediksi klasifikasi.
-        -   Menunjukkan jumlah True Positive (TP), True Negative (TN), False Positive (FP), dan False Negative (FN).
-        -   Penting untuk memahami jenis kesalahan yang dibuat oleh model.
-    -   **Classification Report**: Menyediakan metrik seperti Precision, Recall, dan F1-score selain Accuracy.
-        -   **Precision**: Proporsi prediksi positif yang benar.
-            -   Rumus:
-                ```latex
-                \text{Precision} = \frac{TP}{TP + FP}
-                ```
-        -   **Recall**: Proporsi aktual positif yang teridentifikasi dengan benar.
-            -   Rumus:
-                ```latex
-                \text{Recall} = \frac{TP}{TP + FN}
-                ```
-        -   **F1-score**: Rata-rata harmonik dari Precision dan Recall.
-            -   Rumus:
-                ```latex
-                \text{F1-score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
-                ```
+**Accuracy** = 
+
+![image](https://github.com/user-attachments/assets/8d1fa016-ccec-424d-9e38-bf85054bbf42)
+
+
+### 📄 Contoh dari Confusion Matrix:
+
+|                 | Predicted 0 | Predicted 1 |
+|-----------------|-------------|-------------|
+| **Actual 0**    | TN = 69     | FP = 41     |
+| **Actual 1**    | FN = 41     | TP = 49     |
+
+### 📌 Perhitungan:
+Total sampel = 69 + 41 + 41 + 49 = **200**
+
+Misalnya hasil klasifikasi dari confusion matrix adalah:
+
+- True Positives (TP): 49  
+- True Negatives (TN): 69  
+- False Positives (FP): 41  
+- False Negatives (FN): 41  
+
+Maka:
+
+**Accuracy** = (49 + 69) / (49 + 69 + 41 + 41)  
+**Accuracy** = 118 / 200  
+**Accuracy** = 0.59 → 59%
+
+### 💡 Interpretasi:
+Model berhasil mengklasifikasikan dengan benar sebanyak **59%** dari total data yang tersedia.
+"""
     -   Alasan Pemilihan:
         -   Accuracy memberikan gambaran keseluruhan performa model klasifikasi.
         -   Confusion Matrix memberikan detail lebih lanjut tentang performa per kelas.
         -   Classification Report memberikan metrik tambahan yang berguna untuk memahami trade-off antara Precision dan Recall.
 
-2.  **Regresi:**
-    -   **Root Mean Squared Error (RMSE)**: Mengukur rata-rata besarnya error antara prediksi dan nilai aktual.
-        -   Rumus:
-            ```latex
-            \text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
-            ```
-            -   di mana \( y_i \) adalah nilai aktual, \( \hat{y}_i \) adalah nilai prediksi, dan \( n \) adalah jumlah data.
-        -   Interpretasi: RMSE yang lebih rendah menunjukkan model yang lebih baik.
-    -   **R-squared (R²)**: Mengukur proporsi variansi dalam variabel dependen yang dapat diprediksi dari variabel independen.
-        -   Rumus:
-            ```latex
-            R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
-            ```
-            -   di mana \( y_i \) adalah nilai aktual, \( \hat{y}_i \) adalah nilai prediksi, \( \bar{y} \) adalah rata-rata nilai aktual, dan \( n \) adalah jumlah data.
-        -   Interpretasi: R² berkisar antara 0 dan 1. R² yang lebih tinggi menunjukkan model yang lebih baik dalam menjelaskan variansi data.
+# RMSE (Root Mean Squared Error) - Regresi
 
-### Hasil Evaluasi:
+## Rumus RMSE
 
--   **Klasifikasi Prestasi Siswa**: Model Random Forest mencapai akurasi sekitar 68%. Confusion Matrix dan Classification Report memberikan detail performa per kelas.
--   **Prediksi Skor Matematika**: Model Random Forest menghasilkan RMSE sekitar 20.88 dan R² sekitar 0.27. Ini menunjukkan bahwa model memiliki error rata-rata sekitar 20.88 poin dalam memprediksi skor matematika dan hanya menjelaskan sebagian kecil variansi dalam skor matematika.
--   **Estimasi Total Skor**: Model Linear Regression menghasilkan RMSE sekitar 41.07 dan R² sekitar 0.13. Ini menunjukkan bahwa model memiliki error rata-rata yang cukup tinggi dalam memprediksi total skor dan hanya menjelaskan sebagian kecil variansi dalam total skor.
+**RMSE** = 
+
+![image](https://github.com/user-attachments/assets/a335586b-d926-4b68-bfdf-dcd0e39f9890)
+
+
+## Contoh Perhitungan RMSE
+
+Misalnya nilai sebenarnya (y\_true):
+
+```
+[100, 200, 300]
+```
+
+Prediksi (y\_pred):
+
+```
+[105, 195, 310]
+```
+
+Langkah-langkah:
+
+1. Hitung error kuadrat:
+
+   * (100 - 105)^2 = 25
+   * (200 - 195)^2 = 25
+   * (300 - 310)^2 = 100
+
+2. Hitung rata-rata error kuadrat:
+
+   * (25 + 25 + 100) / 3 = 50
+
+3. Ambil akar dari hasil rata-rata:
+
+   * RMSE = sqrt(50) ≈ **7.07**
+
+## Interpretasi Hasil
+
+Dari output model saya:
+
+* **RMSE Math Score** = **4.47** → Error kecil, berarti model cukup baik dalam memprediksi nilai matematika.
+* **RMSE Total Score** = **41.07** → Error besar, berarti model kurang baik dalam memprediksi nilai total.
+
+Semakin kecil nilai RMSE, semakin baik performa model regresi dalam memprediksi nilai aktual.
+
+
+# R² Score (Koefisien Determinasi) - Regresi
+
+## Rumus
+
+![image](https://github.com/user-attachments/assets/513e43a8-a2e4-43e0-9fc2-89c7fcc3047d)
+
+* $y_i$ = Nilai aktual
+* $\hat{y}_i$ = Nilai prediksi
+* $\bar{y}$ = Rata-rata nilai aktual
+
+## Contoh Perhitungan
+
+Misal:
+
+* `y_true` = \[100, 200, 300] → $\bar{y} = 200$
+* `y_pred` = \[105, 195, 310]
+
+### Langkah:
+
+1. **Sum of Squared Residuals (SSR):**
+
+$$
+(100 - 105)^2 + (200 - 195)^2 + (300 - 310)^2 = 25 + 25 + 100 = 150
+$$
+
+2. **Total Sum of Squares (SST):**
+
+$$
+(100 - 200)^2 + (200 - 200)^2 + (300 - 200)^2 = 10000 + 0 + 10000 = 20000
+$$
+
+3. **Hitung R²:**
+
+$$
+R^2 = 1 - \frac{150}{20000} = 1 - 0.0075 = 0.9925
+$$
+
+> **Interpretasi:** Model menjelaskan 99.25% variasi data (sangat baik).
 
 ---
+
+## Dari Output Model ini:
+
+* **R² Math Score = 0.92** → 92% variasi dijelaskan oleh model (sangat baik)
+* **R² Total Score = 0.13** → Hanya 13% variasi dijelaskan (buruk)
+
 ---
 
 
