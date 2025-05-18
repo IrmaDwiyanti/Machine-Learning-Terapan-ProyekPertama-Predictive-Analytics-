@@ -116,7 +116,7 @@ Insight:
 
 - Kinerja lebih baik dibanding reading score (puncak lebih tinggi dan skew lebih kecil).
 
-- ### Distribusi Average Score
+### Distribusi Average Score
 
 ![image](https://github.com/user-attachments/assets/4d4bdc9c-feee-49f5-808d-6c8656b8ad6d)
 
